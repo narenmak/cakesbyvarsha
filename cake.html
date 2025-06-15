@@ -1,0 +1,112 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home - Cakes by Varsha</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Add config.js in the head section -->
+    <script src="js/config.js"></script>
+</head>
+    <div class="container py-5">
+        <div id="alert-container"></div>
+        
+        <div id="cake-details">
+            <!-- Cake details will be loaded here via JavaScript -->
+            <div class="text-center">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+        </div>
+        
+        <div id="enquiry-form-container" class="mt-5 d-none">
+            <h2>Request a Quote</h2>
+            <form id="enquiry-form" class="needs-validation" novalidate>
+                <input type="hidden" id="cake_id" name="cake_id">
+                <input type="hidden" id="cake_name" name="cake_name">
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="customer_name" class="form-label">Your Name</label>
+                        <input type="text" class="form-control" id="customer_name" name="name" required>
+                        <div class="invalid-feedback">
+                            Please provide your name.
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label for="email" class="form-label">Email Address</label>
+                        <input type="email" class="form-control" id="email" name="email" required>
+                        <div class="invalid-feedback">
+                            Please provide a valid email address.
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="phone" class="form-label">Phone Number</label>
+                        <input type="tel" class="form-control" id="phone" name="phone" required>
+                        <div class="invalid-feedback">
+                            Please provide your phone number.
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label for="date_needed" class="form-label">Date Needed</label>
+                        <input type="date" class="form-control" id="date_needed" name="date_needed" required>
+                        <div class="invalid-feedback">
+                            Please select a date.
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label for="occasion" class="form-label">Occasion</label>
+                        <input type="text" class="form-control" id="occasion" name="occasion">
+                    </div>
+                    
+                    <div class="col-md-4 mb-3">
+                        <label for="size" class="form-label">Size</label>
+                        <select class="form-select" id="size" name="size" required>
+                            <option value="" selected disabled>Select size</option>
+                            <!-- Size options will be populated via JavaScript -->
+                        </select>
+                        <div class="invalid-feedback">
+                            Please select a size.
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4 mb-3">
+                        <label for="flavor" class="form-label">Flavor</label>
+                        <select class="form-select" id="flavor" name="flavor" required>
+                            <option value="" selected disabled>Select flavor</option>
+                            <!-- Flavor options will be populated via JavaScript -->
+                        </select>
+                        <div class="invalid-feedback">
+                            Please select a flavor.
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="message" class="form-label">Special Considerations</label>
+                    <textarea class="form-control" id="message" name="message" rows="4"></textarea>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Submit Enquiry</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+      <script src="js/template-loader.js"></script> 
+    <script src="js/config.js"></script>
+    <script src="js/cake-details.js"></script>
+</body>
+</html>
