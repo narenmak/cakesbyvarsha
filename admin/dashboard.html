@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Cakes by Varsha</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container">
+            <a class="navbar-brand" href="../index.html">
+                <h1 class="logo">Cakes by Varsha</h1>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="../index.html">View Site</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="logout-link">Logout</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-5">
+        <h1 class="mb-4">Admin Dashboard</h1>
+        
+        <div id="alert-container"></div>
+        
+        <ul class="nav nav-tabs mb-4" id="adminTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="cakes-tab" data-bs-toggle="tab" data-bs-target="#cakes" type="button" role="tab">Cakes</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="enquiries-tab" data-bs-toggle="tab" data-bs-target="#enquiries" type="button" role="tab">Enquiries</button>
+            </li>
+        </ul>
+        
+        <div class="tab-content" id="adminTabsContent">
+            <!-- Cakes Tab -->
+            <div class="tab-pane fade show active" id="cakes" role="tabpanel">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2>Manage Cakes</h2>
+                    <button class="btn btn-primary" id="add-cake-btn">Add New Cake</button>
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Image</th>
+                                <th>Name</th>
+                                <th>Description</th>
+                                <th>Starting Price</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cakes-table-body">
+                            <!-- Cakes will be loaded here -->
+                            <tr>
+                                <td colspan="6" class="text-center">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Enquiries Tab -->
+            <div class="tab-pane fade" id="enquiries" role="tabpanel">
+                <h2 class="mb-4">Customer Enquiries</h2>
+                
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Date</th>
+                                <th>Customer</th>
+                                <th>Cake</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="enquiries-table-body">
+                            <!-- Enquiries will be loaded here -->
+                            <tr>
+                                <td colspan="7" class="text-center">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Add/Edit Cake Modal -->
+    <div class="modal fade" id="cakeModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="cakeModalTitle">Add New Cake</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="cake-form" class="needs-validation" novalidate enctype="multipart/form-data">
+                        <input type="hidden" id="cake-id">
+                        
+                        <div class="mb-3">
+                            <label for="cake-name" class="form-label">Cake Name</label>
+                            <input type="text" class="form-control" id="cake-name" name="name" required>
+                            <div class="invalid-feedback">Please provide a cake name.</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="cake-description" class="form-label">Description</label>
+                            <textarea class="form-control" id="cake-description" name="description" rows="3" required></textarea>
+                            <div class="invalid-feedback">Please provide a description.</div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="cake-price-6" class="form-label">Price (6 inches)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">₹</span>
+                                    <input type="number" class="form-control" id="cake-price-6" name="size_6" min="1" required>
+                                </div>
+                                <div class="invalid-feedback">Please provide a valid price.</div>
+                            </div>
+                            
+                            <div class="col-md-4 mb-3">
+                                <label for="cake-price-8" class="form-label">Price (8 inches)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">₹</span>
+                                    <input type="number" class="form-control" id="cake-price-8" name="size_8" min="1" required>
+                                </div>
+                                <div class="invalid-feedback">Please provide a valid price.</div>
+                            </div>
+                            
+                            <div class="col-md-4 mb-3">
+                                <label for="cake-price-10" class="form-label">Price (10 inches)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">₹</span>
+                                    <input type="number" class="form-control" id="cake-price-10" name="size_10" min="1" required>
+                                </div>
+                                <div class="invalid-feedback">Please provide a valid price.</div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="cake-flavors" class="form-label">Flavors (comma separated)</label>
+                            <input type="text" class="form-control" id="cake-flavors" name="flavors" placeholder="Chocolate, Vanilla, Strawberry" required>
+                            <div class="invalid-feedback">Please provide at least one flavor.</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="cake-images" class="form-label">Images</label>
+                            <input type="file" class="form-control" id="cake-images" name="images" accept="image/*" multiple>
+                            <div class="form-text" id="image-help-text">You can select up to 4 images. First image will be the primary image.</div>
+                        </div>
+                        
+                        <div id="image-preview-container" class="d-flex flex-wrap gap-2 mb-3">
+                            <!-- Image previews will be shown here -->
+                        </div>
+                        
+                        <div id="existing-images-container" class="d-flex flex-wrap gap-2 mb-3">
+                            <!-- Existing images will be shown here for edit mode -->
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="save-cake-btn">Save Cake</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- View Enquiry Modal -->
+    <div class="modal fade" id="enquiryModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Enquiry Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="enquiry-details">
+                    <!-- Enquiry details will be loaded here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-dark text-white py-4 mt-auto">
+        <div class="container text-center">
+            <p>&copy; 2024 Cakes by Varsha. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../js/config.js"></script>
+    <script src="../js/admin.js"></script>
+</body>
+</html>
