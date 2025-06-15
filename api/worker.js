@@ -150,7 +150,7 @@ export default {
           
           // In a real app, you would verify the password hash here
           // For simplicity, we're just checking if it matches
-          if (data.password && user.password_hash.includes(data.password)) {
+          if (data.password && data.password === user.password_hash) {
             // Generate a simple token (in production, use proper JWT)
             const token = crypto.randomUUID();
             
