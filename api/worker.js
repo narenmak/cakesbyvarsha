@@ -52,7 +52,7 @@ export default {
         }
         
         // Get a specific cake
-        if (path.match(/^\\/api\\/cakes\\/\\d+$/) && request.method === 'GET') {
+        if (path.match(/^\/api\/cakes\/\d+$/) && request.method === 'GET') {
           const id = path.split('/').pop();
           
           // Get cake details
@@ -222,40 +222,42 @@ export default {
           
           const cakeId = result.meta.last_row_id;
           
+        
           // Handle image uploads
-          const images = formData.getAll('images');
-          if (images && images.length > 0) {
-            for (let i = 0; i < images.length; i++) {
-              const image = images[i];
-              if (!image.name) continue;
+          if (path === '/api/admin/upload-image' && request.method === 'POST') {
+            try {
+              const formData = await request.formData();
+              const image = formData.get('image');
+              
+              if (!image) {
+                return new Response(JSON.stringify({ error: 'No image provided' }), {
+                  ...responseInit,
+                  status: 400,
+                });
+              }
               
               // Generate unique filename
-              const filename = `${Date.now()}-${i}-${image.name}`;
+              const filename = `${Date.now()}-${image.name}`;
               
               // Upload to R2
               await env.IMAGES.put(filename, image);
               
-              // Save image reference in database
-              await env.DB.prepare(
-                `INSERT INTO cake_images (cake_id, image_name, image_path, is_primary)
-                 VALUES (?, ?, ?, ?)`
-              ).bind(
-                cakeId,
-                image.name,
-                `/api/images/${filename}`,
-                i === 0 ? 1 : 0  // First image is primary
-              ).run();
+              return new Response(JSON.stringify({ 
+                success: true,
+                path: `/api/images/${filename}`
+              }), responseInit);
+            } catch (error) {
+              console.error('Image upload error:', error);
+              return new Response(JSON.stringify({ error: 'Failed to upload image' }), {
+                ...responseInit,
+                status: 500,
+              });
             }
           }
-          
-          return new Response(JSON.stringify({ 
-            success: true,
-            id: cakeId
-          }), responseInit);
         }
         
         // Update an existing cake (admin only)
-        if (path.match(/^\\/api\\/admin\\/cakes\\/\\d+$/) && request.method === 'PUT') {
+       if (path.match(/^\/api\/admin\/cakes\/\d+$/) && request.method === 'PUT') {
           // In production, verify admin token here
           
           const id = path.split('/').pop();
@@ -332,7 +334,7 @@ export default {
         }
         
         // Delete a cake (admin only)
-        if (path.match(/^\\/api\\/admin\\/cakes\\/\\d+$/) && request.method === 'DELETE') {
+        if (path.match(/^\/api\/admin\/cakes\/\d+$/) && request.method === 'DELETE') {
           // In production, verify admin token here
           
           const id = path.split('/').pop();

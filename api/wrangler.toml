@@ -1,12 +1,12 @@
 name = "cakesbyvarsha-api"
-main = "api/worker.js"
+main = "worker.js"
 compatibility_date = "2023-10-30"
 
 # D1 Database binding
 [[d1_databases]]
 binding = "DB"
 database_name = "cakesbyvarsha-db"
-database_id = "your-database-id-here"
+database_id = "bad3c0ea-5f68-49cc-8af1-628fc2c08788"
 
 # R2 Storage binding for images
 [[r2_buckets]]
