@@ -87,6 +87,12 @@ async function loadTemplates(callback) {
     if (callback) callback();
 }
 
+
+
+async function fetchTemplate(url) {
+    const response = await fetch(url);
+    return await response.text();
+}
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
     loadTemplates(() => {
