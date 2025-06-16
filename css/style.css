@@ -49,10 +49,6 @@ body {
     object-fit: cover;
 }
 
-.card-title {
-    color: #e84393;
-    font-weight: 600;
-}
 
 .price {
     font-weight: bold;
@@ -81,10 +77,41 @@ body {
 }
 
 /* Footer */
+/* Footer styling */
 footer {
-    margin-top: 50px;
+  background-color: var(--dark);
+  color: white;
 }
 
+footer a {
+  color: var(--accent) !important;
+}
+
+footer a:hover {
+  color: white !important;
+}
+
+/* Section styling */
+section {
+  padding: 60px 0;
+}
+
+h2 {
+  position: relative;
+  padding-bottom: 15px;
+  margin-bottom: 30px;
+}
+
+h2:after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 3px;
+  background-color: var(--primary);
+}
 /* Social Icons */
 .social-icons a {
     color: #e84393;
@@ -268,36 +295,55 @@ body {
 }
 
 .btn-primary:hover {
-    background-color: #d63384;
-    border-color: #d63384;
-    transform: scale(1.05);
+  background-color: #d83179;
+  border-color: #d83179;
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(232, 62, 140, 0.3);
 }
 
 /* Add to css/style.css */
 
 /* Modern color scheme */
+
+/* Updated color palette */
 :root {
-  --primary: #ff6b6b;
-  --secondary: #4ecdc4;
-  --dark: #b291b8;
-  --light: #f7f7f7;
-  --accent: #ffe66d;
+  --primary: #e83e8c;       /* Soft pink */
+  --secondary: #6a4c93;     /* Deep purple */
+  --accent: #ffc107;        /* Warm yellow */
+  --light: #f8f9fa;         /* Off-white */
+  --dark: #343a40;          /* Charcoal */
+  --text: #495057;          /* Soft black */
+  --background: #ffffff;    /* White */
 }
 
 /* Improved typography */
 body {
   font-family: 'Montserrat', sans-serif;
-  color: var(--dark);
-  background-color: var(--light);
-  line-height: 1.8;
+  color: var(--text);
+  background-color: var(--background);
 }
 
 .logo {
-  font-family: 'Pacifico', cursive;
   color: var(--primary);
-  font-size: 2rem;
 }
 
+.card-title {
+  color: var(--primary);
+}
+
+.price {
+  color: var(--secondary);
+}
+
+.btn-primary {
+  background-color: var(--primary);
+  border-color: var(--primary);
+}
+
+.btn-primary:hover {
+  background-color: #d83179;
+  border-color: #d83179;
+}
 /* Enhanced hero section */
 .hero {
   background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('../images/hero-bg.jpg');
@@ -348,11 +394,6 @@ body {
   padding: 25px;
 }
 
-.card-title {
-  color: var(--primary);
-  font-weight: 700;
-  font-size: 1.4rem;
-}
 
 .price {
   font-weight: 700;
@@ -363,7 +404,10 @@ body {
 
 /* Attractive buttons */
 .btn-primary {
-  background: linear-gradient(135deg, var(--primary), #ff9a9e);
-  border: none;
-  border-radius: 30
+  background-color: var(--primary);
+  border-color: var(--primary);
+  border-radius: 30px;
+  padding: 8px 25px;
+  font-weight: 500;
+  transition: all 0.3s ease;
 }

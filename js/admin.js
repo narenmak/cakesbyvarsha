@@ -1,39 +1,63 @@
 // Admin dashboard functionality
 document.addEventListener('DOMContentLoaded', () => {
-  console.log('Admin dashboard loaded, API_URL:', API_URL);
+  console.log('DOM loaded in admin.js');
   
   // Check if logged in
   const token = localStorage.getItem('adminToken');
   if (!token) {
+    console.log('No admin token found, redirecting to login');
     window.location.href = 'index.html';
     return;
   }
   
-  // Setup logout
-  document.getElementById('logout-link').addEventListener('click', (e) => {
-    e.preventDefault();
-    localStorage.removeItem('adminToken');
-    window.location.href = 'index.html';
-  });
-  
+  console.log('Admin token found, loading dashboard');
+
+   // Setup logout - Add null check
+  const logoutLink = document.getElementById('logout-link');
+  if (logoutLink) {
+    logoutLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      localStorage.removeItem('adminToken');
+      window.location.href = 'index.html';
+    });
+  } else {
+    console.error('Logout link not found');
+  }
+
   // Load cakes and enquiries
   loadCakes();
   loadEnquiries();
   
-  // Setup add cake button
-  document.getElementById('add-cake-btn').addEventListener('click', () => {
-    resetCakeForm();
-    document.getElementById('cakeModalTitle').textContent = 'Add New Cake';
-    const cakeModal = new bootstrap.Modal(document.getElementById('cakeModal'));
-    cakeModal.show();
-  });
+
+   const addCakeBtn = document.getElementById('add-cake-btn');
+  if (addCakeBtn) {
+    addCakeBtn.addEventListener('click', () => {
+      resetCakeForm();
+      document.getElementById('cakeModalTitle').textContent = 'Add New Cake';
+      const cakeModal = new bootstrap.Modal(document.getElementById('cakeModal'));
+      cakeModal.show();
+    });
+  } else {
+    console.error('Add cake button not found');
+  }
   
-  // Setup save cake button
-  document.getElementById('save-cake-btn').addEventListener('click', saveCake);
+// Setup save cake button - Add null check
+  const saveCakeBtn = document.getElementById('save-cake-btn');
+  if (saveCakeBtn) {
+    saveCakeBtn.addEventListener('click', saveCake);
+  } else {
+    console.error('Save cake button not found');
+  }
   
-  // Setup image preview
-  document.getElementById('cake-images').addEventListener('change', previewImages);
+  // Setup image preview - Add null check
+  const cakeImages = document.getElementById('cake-images');
+  if (cakeImages) {
+    cakeImages.addEventListener('change', previewImages);
+  } else {
+    console.error('Cake images input not found');
+  }
 });
+  
 
 // Load cakes for the admin table
 async function loadCakes() {
