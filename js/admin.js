@@ -90,10 +90,17 @@ async function loadCakes() {
       }
       
       const row = document.createElement('tr');
+
+      const imageUrl = cake.image_url
+      ? (cake.image_url.startsWith('http')
+        ? cake.image_url
+        : API_URL.substring(0, API_URL.lastIndexOf('/api')) + cake.image_url)
+      : '../images/placeholder.jpg';
+
       row.innerHTML = `
         <td>${cake.id}</td>
         <td>
-            <img src="${API_URL}${cake.image_url || '/api/images/placeholder.jpg'}" 
+            <img src="${imageUrl}" 
                 alt="${cake.name}" 
                 style="width: 50px; height: 50px; object-fit: cover;">
         </td>

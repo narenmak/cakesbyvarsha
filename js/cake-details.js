@@ -45,22 +45,31 @@ async function loadCakeDetails(cakeId) {
         document.title = `${cake.name} - Cakes by Varsha`;
         
         // Create cake details HTML
+        // In cake-details.js - Fix image URL handling in the cake details page
+// When creating the main image HTML
         let imagesHtml = '';
         if (cake.images && cake.images.length > 0) {
             const mainImage = cake.images[0];
+            const mainImageUrl = mainImage.image_path.startsWith('http')
+                ? mainImage.image_path
+                : API_URL.substring(0, API_URL.lastIndexOf('/api')) + mainImage.image_path;
             
             imagesHtml = `
                 <div class="cake-image-gallery">
-                    <img src="${API_URL}${mainImage.image_path}" id="main-cake-image" class="cake-main-image" alt="${cake.name}">
+                    <img src="${mainImageUrl}" id="main-cake-image" class="cake-main-image" alt="${cake.name}">
                     <div class="cake-thumbnails">
             `;
             
             cake.images.forEach((image, index) => {
+                const thumbUrl = image.image_path.startsWith('http')
+                    ? image.image_path
+                    : API_URL.substring(0, API_URL.lastIndexOf('/api')) + image.image_path;
+                
                 imagesHtml += `
-                    <img src="${API_URL}${image.image_path}" 
-                         class="cake-thumbnail ${index === 0 ? 'active' : ''}" 
-                         alt="${cake.name}" 
-                         onclick="changeMainImage('${API_URL}${image.image_path}', this)">
+                    <img src="${thumbUrl}" 
+                        class="cake-thumbnail ${index === 0 ? 'active' : ''}" 
+                        alt="${cake.name}" 
+                        onclick="changeMainImage('${thumbUrl}', this)">
                 `;
             });
             
@@ -71,10 +80,11 @@ async function loadCakeDetails(cakeId) {
         } else {
             imagesHtml = `
                 <div class="cake-image-gallery">
-                    <img src="${API_URL}/api/images/placeholder.jpg" class="cake-main-image" alt="${cake.name}">
+                    <img src="images/placeholder.jpg" class="cake-main-image" alt="${cake.name}">
                 </div>
             `;
         }
+
         
         // Create prices HTML
       let pricesHtml = '<ul class="cake-price-list">';

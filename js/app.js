@@ -33,11 +33,15 @@ async function loadCakes() {
         cakes.forEach(cake => {
             // Fix image URL path
             // In app.js - Update the image URL handling
+            
+
+            // In app.js - Fix image URL handling
             const imageUrl = cake.image_url 
             ? (cake.image_url.startsWith('http') 
                 ? cake.image_url 
-                : API_URL.replace('/api', '') + cake.image_url)
+                : API_URL.substring(0, API_URL.lastIndexOf('/api')) + cake.image_url)
             : 'images/placeholder.jpg';
+
 
             
             const cakeCard = document.createElement('div');
