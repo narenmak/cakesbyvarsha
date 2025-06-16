@@ -38,13 +38,13 @@ async function loadCakes() {
             
             const cakeCard = document.createElement('div');
             cakeCard.className = 'col-md-4 mb-4';
-            cakeCard.innerHTML = `
+           cakeCard.innerHTML = `
                 <div class="card h-100">
                     <img src="${imageUrl}" class="card-img-top" alt="${cake.name}">
                     <div class="card-body">
                         <h5 class="card-title">${cake.name}</h5>
                         <p class="card-text">${cake.description ? cake.description.substring(0, 100) + (cake.description.length > 100 ? '...' : '') : ''}</p>
-                        <p class="price">Starting from ₹${getMinPrice(cake.prices)}</p>
+                        <p class="price">Starting from £${getMinPrice(cake.prices)}</p>
                         <a href="cake.html?id=${cake.id}" class="btn btn-primary">View Details</a>
                     </div>
                 </div>
