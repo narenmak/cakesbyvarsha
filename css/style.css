@@ -17,20 +17,7 @@ body {
     font-size: 1.8rem;
 }
 
-/* Hero Section */
-.hero {
-    background: linear-gradient(rgba(255, 192, 203, 0.2), rgba(255, 192, 203, 0.2)), url('../images/hero-bg.jpg');
-    background-size: cover;
-    background-position: center;
-    color: #333;
-    padding: 100px 0;
-    margin-bottom: 30px;
-}
 
-.hero h1 {
-    font-size: 2.5rem;
-    font-weight: 700;
-}
 
 /* Card Styles */
 .card {
@@ -150,6 +137,43 @@ footer .social-icons a:hover {
     box-shadow: 0 0 0 0.25rem rgba(232, 67, 147, 0.25);
 }
 
+
+/* Add to your css/style.css file */
+.hero {
+  background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), 
+              url('https://images.unsplash.com/photo-1578985545062-69928b1d9587?ixlib=rb-4.0.3&auto=format&fit=crop&w=1280&q=80');
+  background-size: cover;
+  background-position: center;
+  color: white;
+  padding: 120px 0;
+  margin-bottom: 50px;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+}
+
+.hero h1 {
+  font-size: 3rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+.hero .lead {
+  font-size: 1.5rem;
+  font-weight: 300;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+/* Add a decorative element */
+.hero h1:after {
+  content: '';
+  display: block;
+  width: 80px;
+  height: 3px;
+  background-color: var(--accent, #ffc107);
+  margin: 20px auto;
+}
+
+
 /* Responsive Adjustments */
 @media (max-width: 768px) {
     .hero {
@@ -253,17 +277,6 @@ body {
     font-size: 1.8rem;
 }
 
-/* Enhanced hero section */
-.hero {
-    background: linear-gradient(rgba(255, 192, 203, 0.2), rgba(255, 192, 203, 0.2)), url('../images/hero-bg.jpg');
-    background-size: cover;
-    background-position: center;
-    color: #333;
-    padding: 120px 0;
-    margin-bottom: 50px;
-    border-radius: 0 0 50px 50px;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-}
 
 /* Enhanced card styles */
 .card {
@@ -345,27 +358,6 @@ body {
   border-color: #d83179;
 }
 /* Enhanced hero section */
-.hero {
-  background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('../images/hero-bg.jpg');
-  background-size: cover;
-  background-position: center;
-  color: white;
-  padding: 150px 0;
-  margin-bottom: 60px;
-  position: relative;
-}
-
-.hero::after {
-  content: '';
-  position: absolute;
-  bottom: -50px;
-  left: 0;
-  right: 0;
-  height: 100px;
-  background: var(--light);
-  clip-path: ellipse(50% 50% at 50% 50%);
-}
-
 /* Stylish cards */
 .card {
   border: none;
