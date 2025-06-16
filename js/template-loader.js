@@ -35,14 +35,33 @@ async function fetchTemplate(url) {
 }
 
 // js/template-loader.js
+
+// js/template-loader.js
 async function loadTemplates(callback) {
-    // Load templates
+    // Get current page path
+    const currentPath = window.location.pathname;
+    const isAdminPage = currentPath.includes('/admin/');
+    
+    // Don't apply templates to admin pages
+    if (isAdminPage) {
+        // Just add the Google Fonts to admin pages
+        const fontLink = document.createElement('link');
+        fontLink.href = 'https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&family=Pacifico&display=swap';
+        fontLink.rel = 'stylesheet';
+        document.head.appendChild(fontLink);
+        
+        // Call the callback function
+        if (callback) callback();
+        return;
+    }
+    
+    // For regular pages, load templates
     const headerTemplate = await fetchTemplate('templates/header.html');
     const navbarTemplate = await fetchTemplate('templates/navbar.html');
     const footerTemplate = await fetchTemplate('templates/footer.html');
     
     // Get current page
-    const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+    const currentPage = currentPath.split('/').pop() || 'index.html';
     
     // Insert header (replace title)
     let pageTitle = 'Home';
@@ -64,13 +83,8 @@ async function loadTemplates(callback) {
     // Insert footer
     document.body.insertAdjacentHTML('beforeend', footerTemplate);
     
-    // Call the callback function when templates are loaded
+    // Call the callback function
     if (callback) callback();
-}
-
-async function fetchTemplate(url) {
-    const response = await fetch(url);
-    return await response.text();
 }
 
 // Initialize when DOM is ready
