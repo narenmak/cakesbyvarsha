@@ -139,40 +139,32 @@ footer .social-icons a:hover {
 
 
 /* Add to your css/style.css file */
+
+/* Update in your css/style.css file */
 .hero {
-  background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), 
-              url('https://images.unsplash.com/photo-1578985545062-69928b1d9587?ixlib=rb-4.0.3&auto=format&fit=crop&w=1280&q=80');
+  background: linear-gradient(rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.7)), 
+              url('https://images.unsplash.com/photo-1621303837174-89787a7d4729?ixlib=rb-4.0.3&auto=format&fit=crop&w=1280&q=80');
   background-size: cover;
   background-position: center;
-  color: white;
+  color: var(--dark, #343a40);
   padding: 120px 0;
   margin-bottom: 50px;
-  text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
 }
 
 .hero h1 {
   font-size: 3rem;
   font-weight: 700;
   margin-bottom: 20px;
+  color: var(--primary, #e83e8c);
 }
 
 .hero .lead {
   font-size: 1.5rem;
-  font-weight: 300;
+  font-weight: 400;
   max-width: 700px;
   margin: 0 auto;
 }
-
-/* Add a decorative element */
-.hero h1:after {
-  content: '';
-  display: block;
-  width: 80px;
-  height: 3px;
-  background-color: var(--accent, #ffc107);
-  margin: 20px auto;
-}
-
 
 /* Responsive Adjustments */
 @media (max-width: 768px) {
