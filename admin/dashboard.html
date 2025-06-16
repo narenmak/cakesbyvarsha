@@ -8,7 +8,47 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&family=Pacifico&display=swap" rel="stylesheet">
      <script src="../js/config.js"></script>
+
+     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&family=Pacifico&display=swap" rel="stylesheet">
+<style>
+    /* Admin dashboard styles */
+    body {
+        font-family: 'Montserrat', sans-serif;
+    }
+    .logo {
+        font-family: 'Pacifico', cursive;
+        color: var(--primary, #ff6b6b);
+    }
+    .nav-tabs .nav-link.active {
+        color: var(--primary, #ff6b6b);
+        font-weight: 600;
+    }
+    .table {
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    }
+    .btn-primary {
+        background: linear-gradient(135deg, var(--primary, #ff6b6b), #ff9a9e);
+        border: none;
+    }
+    .btn-danger {
+        background: linear-gradient(135deg, #ff6b6b, #ff4757);
+        border: none;
+    }
+    .modal-content {
+        border-radius: 15px;
+        overflow: hidden;
+    }
+    .modal-header {
+        background-color: var(--primary, #ff6b6b);
+        color: white;
+    }
+</style>
+
 </head>
+<!-- Add to the head section -->
+
 <body>
     <div class="container py-5">
         <h1 class="mb-4">Admin Dashboard</h1>
@@ -192,7 +232,6 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-   <script src="../js/template-loader.js"></script> 
     <script src="../js/config.js"></script>
     <script src="../js/admin.js"></script>
 </body>
