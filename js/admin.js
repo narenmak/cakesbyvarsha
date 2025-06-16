@@ -332,99 +332,145 @@ async function deleteCake(id) {
   }
 }
 
-// Save cake (add or edit)
-async function saveCake() {
-  const form = document.getElementById('cake-form');
-  
-  if (!form.checkValidity()) {
-    form.classList.add('was-validated');
-    return;
-  }
-  
-  const cakeId = document.getElementById('cake-id').value;
-  const isEdit = cakeId !== '';
-  
-  try {
-    // Get form data
-    const name = document.getElementById('cake-name').value;
-    const description = document.getElementById('cake-description').value;
-    const size6 = document.getElementById('cake-price-6').value;
-    const size8 = document.getElementById('cake-price-8').value;
-    const size10 = document.getElementById('cake-price-10').value;
-    const flavors = document.getElementById('cake-flavors').value;
-    const imageInput = document.getElementById('cake-images');
-    
-    // Create FormData object
-    const formData = new FormData();
-    formData.append('name', name);
-    formData.append('description', description);
-    formData.append('size_6', size6);
-    formData.append('size_8', size8);
-    formData.append('size_10', size10);
-    formData.append('flavors', flavors);
-    
-    // Add images if any
-    if (imageInput.files && imageInput.files.length > 0) {
-      for (let i = 0; i < imageInput.files.length; i++) {
-        formData.append('images', imageInput.files[i]);
+    // Save cake (add or edit)
+      // In admin.js - Add image compression before upload
+    async function saveCake() {
+      const form = document.getElementById('cake-form');
+      
+      if (!form.checkValidity()) {
+        form.classList.add('was-validated');
+        return;
+      }
+      
+      const cakeId = document.getElementById('cake-id').value;
+      const isEdit = cakeId !== '';
+      
+      try {
+        // Get form data
+        const name = document.getElementById('cake-name').value;
+        const description = document.getElementById('cake-description').value;
+        const size6 = document.getElementById('cake-price-6').value;
+        const size8 = document.getElementById('cake-price-8').value;
+        const size10 = document.getElementById('cake-price-10').value;
+        const flavors = document.getElementById('cake-flavors').value;
+        const imageInput = document.getElementById('cake-images');
+        
+        // Create FormData object
+        const formData = new FormData();
+        formData.append('name', name);
+        formData.append('description', description);
+        formData.append('size_6', size6);
+        formData.append('size_8', size8);
+        formData.append('size_10', size10);
+        formData.append('flavors', flavors);
+        
+        // Compress and add images if any
+        if (imageInput.files && imageInput.files.length > 0) {
+          for (let i = 0; i < imageInput.files.length; i++) {
+            const file = imageInput.files[i];
+            
+            // Compress image
+            const compressedFile = await compressImage(file);
+            formData.append('images', compressedFile, file.name);
+          }
+        }
+        
+        const url = isEdit 
+          ? `${API_URL}/admin/cakes/${cakeId}` 
+          : `${API_URL}/admin/cakes`;
+        
+        const method = isEdit ? 'PUT' : 'POST';
+        
+        console.log(`Saving cake to ${url} with method ${method}`);
+        
+        const response = await fetch(url, {
+          method: method,
+          body: formData
+        });
+        
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('Server error response:', errorText);
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          // Hide modal
+          const cakeModal = bootstrap.Modal.getInstance(document.getElementById('cakeModal'));
+          cakeModal.hide();
+          
+          // Show success message
+          showAlert(`Cake ${isEdit ? 'updated' : 'added'} successfully`, 'success');
+          
+          // Reload cakes
+          loadCakes();
+        } else {
+          showAlert(result.error || `Failed to ${isEdit ? 'update' : 'add'} cake`, 'danger');
+        }
+        
+      } catch (error) {
+        console.error('Error saving cake:', error);
+        showAlert(`Failed to ${isEdit ? 'update' : 'add'} cake: ${error.message}`, 'danger');
       }
     }
-    
-    const url = isEdit 
-      ? `${API_URL}/admin/cakes/${cakeId}` 
-      : `${API_URL}/admin/cakes`;
-    
-    const method = isEdit ? 'PUT' : 'POST';
-    
-    console.log(`Saving cake to ${url} with method ${method}`);
-    console.log('Form data:', {
-      name,
-      description,
-      size_6: size6,
-      size_8: size8,
-      size_10: size10,
-      flavors,
-      images: imageInput.files ? imageInput.files.length : 0
-    });
-    
-    const response = await fetch(url, {
-      method: method,
-      // Remove the Authorization header for now
-      body: formData
-    });
-    
-    if (!response.ok) {
-  try {
-    const errorText = await response.text();
-    console.error('Server error response:', errorText);
-  } catch (e) {
-    console.error('Could not read error response');
-  }
-  throw new Error(`HTTP error! Status: ${response.status}`);
-}
-    
-    const result = await response.json();
-    console.log('Save result:', result);
-    
-    if (result.success) {
-      // Hide modal
-      const cakeModal = bootstrap.Modal.getInstance(document.getElementById('cakeModal'));
-      cakeModal.hide();
-      
-      // Show success message
-      showAlert(`Cake ${isEdit ? 'updated' : 'added'} successfully`, 'success');
-      
-      // Reload cakes
-      loadCakes();
-    } else {
-      showAlert(result.error || `Failed to ${isEdit ? 'update' : 'add'} cake`, 'danger');
+
+    // Image compression function
+    async function compressImage(file) {
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = function(event) {
+          const img = new Image();
+          img.src = event.target.result;
+          
+          img.onload = function() {
+            // Create canvas
+            const canvas = document.createElement('canvas');
+            
+            // Calculate new dimensions (max 800x600)
+            let width = img.width;
+            let height = img.height;
+            
+            if (width > height) {
+              if (width > 800) {
+                height = Math.round((height * 800) / width);
+                width = 800;
+              }
+            } else {
+              if (height > 600) {
+                width = Math.round((width * 600) / height);
+                height = 600;
+              }
+            }
+            
+            canvas.width = width;
+            canvas.height = height;
+            
+            // Draw image on canvas
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+            
+            // Convert to blob
+            canvas.toBlob(
+              (blob) => {
+                // Create a new file with compressed data
+                const compressedFile = new File([blob], file.name, {
+                  type: 'image/jpeg',
+                  lastModified: Date.now()
+                });
+                
+                resolve(compressedFile);
+              },
+              'image/jpeg',
+              0.7  // Quality (0.7 = 70%)
+            );
+          };
+        };
+      });
     }
-    
-  } catch (error) {
-    console.error('Error saving cake:', error);
-    showAlert(`Failed to ${isEdit ? 'update' : 'add'} cake: ${error.message}`, 'danger');
-  }
-}
+
 
 // Reset cake form
 function resetCakeForm() {

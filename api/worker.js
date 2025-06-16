@@ -179,84 +179,90 @@ export default {
         
         // Add a new cake (admin only)
         // Try a more flexible path matching
-        if (path.includes('/api/admin/cakes') && request.method === 'POST') {
-  // Your existing code
-          // In production, verify admin token here
+       // In worker.js - Update the admin/cakes endpoint
+        if (path === '/api/admin/cakes' && request.method === 'POST') {
+          console.log('Processing cake creation request');
           
-          // Handle multipart form data
-          const formData = await request.formData();
-          
-          const name = formData.get('name');
-          const description = formData.get('description');
-          const size6 = formData.get('size_6');
-          const size8 = formData.get('size_8');
-          const size10 = formData.get('size_10');
-          const flavors = formData.get('flavors');
-          
-          if (!name || !description) {
-            return new Response(JSON.stringify({ error: 'Missing required fields' }), {
+          try {
+            // Parse form data
+            const formData = await request.formData();
+            console.log('Form data received:', Object.fromEntries(formData.entries()));
+            
+            const name = formData.get('name');
+            const description = formData.get('description');
+            const size_6 = formData.get('size_6');
+            const size_8 = formData.get('size_8');
+            const size_10 = formData.get('size_10');
+            const flavors = formData.get('flavors');
+            
+            // Insert cake data
+            const result = await env.DB.prepare(
+              `INSERT INTO cakes (name, description, sizes, flavors, prices)
+              VALUES (?, ?, ?, ?, ?)`
+            ).bind(
+              name,
+              description,
+              JSON.stringify(['6 inches', '8 inches', '10 inches']),
+              JSON.stringify(flavors.split(',').map(f => f.trim()).filter(f => f)),
+              JSON.stringify({
+                '6 inches': parseInt(size_6) || 0,
+                '8 inches': parseInt(size_8) || 0,
+                '10 inches': parseInt(size_10) || 0
+              })
+            ).run();
+            
+            const cakeId = result.meta.last_row_id;
+            console.log('Cake created with ID:', cakeId);
+            
+            // Handle image uploads
+            const images = formData.getAll('images');
+            console.log('Images received:', images.length);
+            
+            if (images && images.length > 0) {
+              for (let i = 0; i < images.length; i++) {
+                const image = images[i];
+                if (!image || !image.name) continue;
+                
+                console.log('Processing image:', image.name, 'size:', image.size);
+                
+                // Generate unique filename
+                const filename = `${Date.now()}-${i}-${image.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+                
+                // Upload to R2
+                await env.IMAGES.put(filename, image);
+                console.log('Image uploaded to R2:', filename);
+                
+                // Save image reference in database
+                const imagePath = `/api/images/${filename}`;
+                await env.DB.prepare(
+                  `INSERT INTO cake_images (cake_id, image_name, image_path, is_primary)
+                  VALUES (?, ?, ?, ?)`
+                ).bind(
+                  cakeId,
+                  image.name,
+                  imagePath,
+                  i === 0 ? 1 : 0
+                ).run();
+                
+                console.log('Image reference saved in DB:', imagePath);
+              }
+            }
+            
+            return new Response(JSON.stringify({ 
+              success: true,
+              id: cakeId
+            }), responseInit);
+          } catch (error) {
+            console.error('Error creating cake:', error);
+            return new Response(JSON.stringify({ 
+              error: 'Error creating cake: ' + error.message
+            }), {
               ...responseInit,
-              status: 400,
+              status: 500,
             });
           }
-          
-          // Parse flavors
-          const flavorsList = flavors.split(',').map(f => f.trim()).filter(f => f);
-          
-          // Create prices object
-          const prices = {
-            '6 inches': parseInt(size6) || 0,
-            '8 inches': parseInt(size8) || 0,
-            '10 inches': parseInt(size10) || 0,
-          };
-          
-          // Insert cake
-          const result = await env.DB.prepare(
-            `INSERT INTO cakes (name, description, sizes, flavors, prices)
-             VALUES (?, ?, ?, ?, ?)`
-          ).bind(
-            name,
-            description,
-            JSON.stringify(['6 inches', '8 inches', '10 inches']),
-            JSON.stringify(flavorsList),
-            JSON.stringify(prices)
-          ).run();
-          
-          const cakeId = result.meta.last_row_id;
-          
-        
-          // Handle image uploads
-          if (path === '/api/admin/upload-image' && request.method === 'POST') {
-            try {
-              const formData = await request.formData();
-              const image = formData.get('image');
-              
-              if (!image) {
-                return new Response(JSON.stringify({ error: 'No image provided' }), {
-                  ...responseInit,
-                  status: 400,
-                });
-              }
-              
-              // Generate unique filename
-              const filename = `${Date.now()}-${image.name}`;
-              
-              // Upload to R2
-              await env.IMAGES.put(filename, image);
-              
-              return new Response(JSON.stringify({ 
-                success: true,
-                path: `/api/images/${filename}`
-              }), responseInit);
-            } catch (error) {
-              console.error('Image upload error:', error);
-              return new Response(JSON.stringify({ error: 'Failed to upload image' }), {
-                ...responseInit,
-                status: 500,
-              });
-            }
-          }
         }
+
         
         // Update an existing cake (admin only)
        if (path.match(/^\/api\/admin\/cakes\/\d+$/) && request.method === 'PUT') {
