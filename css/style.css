@@ -4,7 +4,6 @@
 
 /* Add to css/style.css */
 
-
 body {
     font-family: 'Poppins', sans-serif;
     color: #333;
@@ -272,4 +271,99 @@ body {
     background-color: #d63384;
     border-color: #d63384;
     transform: scale(1.05);
+}
+
+/* Add to css/style.css */
+
+/* Modern color scheme */
+:root {
+  --primary: #ff6b6b;
+  --secondary: #4ecdc4;
+  --dark: #292f36;
+  --light: #f7f7f7;
+  --accent: #ffe66d;
+}
+
+/* Improved typography */
+body {
+  font-family: 'Montserrat', sans-serif;
+  color: var(--dark);
+  background-color: var(--light);
+  line-height: 1.8;
+}
+
+.logo {
+  font-family: 'Pacifico', cursive;
+  color: var(--primary);
+  font-size: 2rem;
+}
+
+/* Enhanced hero section */
+.hero {
+  background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('../images/hero-bg.jpg');
+  background-size: cover;
+  background-position: center;
+  color: white;
+  padding: 150px 0;
+  margin-bottom: 60px;
+  position: relative;
+}
+
+.hero::after {
+  content: '';
+  position: absolute;
+  bottom: -50px;
+  left: 0;
+  right: 0;
+  height: 100px;
+  background: var(--light);
+  clip-path: ellipse(50% 50% at 50% 50%);
+}
+
+/* Stylish cards */
+.card {
+  border: none;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  transition: all 0.4s ease;
+}
+
+.card:hover {
+  transform: translateY(-15px);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+}
+
+.card-img-top {
+  height: 250px;
+  object-fit: cover;
+  transition: transform 0.8s ease;
+}
+
+.card:hover .card-img-top {
+  transform: scale(1.05);
+}
+
+.card-body {
+  padding: 25px;
+}
+
+.card-title {
+  color: var(--primary);
+  font-weight: 700;
+  font-size: 1.4rem;
+}
+
+.price {
+  font-weight: 700;
+  color: var(--secondary);
+  font-size: 1.2rem;
+  margin-top: 15px;
+}
+
+/* Attractive buttons */
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary), #ff9a9e);
+  border: none;
+  border-radius: 30
 }
