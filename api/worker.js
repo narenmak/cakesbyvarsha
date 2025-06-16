@@ -317,15 +317,17 @@ export default {
               // Upload to R2
               await env.IMAGES.put(filename, image);
               
-              // Save image reference in database
+              const imagePath = `/api/images/${filename}`;
+
+              // When saving to database, use the full path
               await env.DB.prepare(
                 `INSERT INTO cake_images (cake_id, image_name, image_path, is_primary)
-                 VALUES (?, ?, ?, ?)`
+                VALUES (?, ?, ?, ?)`
               ).bind(
-                id,
+                cakeId,
                 image.name,
-                `/api/images/${filename}`,
-                0  // New images are not primary by default
+                imagePath, // Use the correct path
+                i === 0 ? 1 : 0
               ).run();
             }
           }
@@ -357,29 +359,37 @@ export default {
         }
         
         // Serve images from R2
+        // In worker.js - Verify the image serving endpoint
         if (path.startsWith('/api/images/')) {
-          const filename = path.replace('/api/images/', '');
-          
-          // Get image from R2
-          const image = await env.IMAGES.get(filename);
-          
-          if (!image) {
-            return new Response('Image not found', { status: 404 });
-          }
-          
-          // Determine content type
-          let contentType = 'image/jpeg';
-          if (filename.endsWith('.png')) contentType = 'image/png';
-          if (filename.endsWith('.gif')) contentType = 'image/gif';
-          if (filename.endsWith('.webp')) contentType = 'image/webp';
-          
-          return new Response(image.body, {
-            headers: {
-              'Content-Type': contentType,
-              'Cache-Control': 'public, max-age=31536000',
-              ...corsHeaders
+          try {
+            const filename = path.replace('/api/images/', '');
+            console.log('Serving image:', filename);
+            
+            // Get image from R2
+            const image = await env.IMAGES.get(filename);
+            
+            if (!image) {
+              console.log('Image not found:', filename);
+              return new Response('Image not found', { status: 404 });
             }
-          });
+            
+            // Determine content type
+            let contentType = 'image/jpeg';
+            if (filename.endsWith('.png')) contentType = 'image/png';
+            if (filename.endsWith('.gif')) contentType = 'image/gif';
+            if (filename.endsWith('.webp')) contentType = 'image/webp';
+            
+            return new Response(image.body, {
+              headers: {
+                'Content-Type': contentType,
+                'Cache-Control': 'public, max-age=31536000',
+                ...corsHeaders
+              }
+            });
+          } catch (error) {
+            console.error('Error serving image:', error);
+            return new Response('Error serving image', { status: 500 });
+          }
         }
         
         // Route not found

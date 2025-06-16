@@ -382,17 +382,19 @@ async function saveCake() {
     
     const response = await fetch(url, {
       method: method,
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
-      },
+      // Remove the Authorization header for now
       body: formData
     });
     
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Server error response:', errorText);
-      throw new Error(`HTTP error! Status: ${response.status}`);
-    }
+  try {
+    const errorText = await response.text();
+    console.error('Server error response:', errorText);
+  } catch (e) {
+    console.error('Could not read error response');
+  }
+  throw new Error(`HTTP error! Status: ${response.status}`);
+}
     
     const result = await response.json();
     console.log('Save result:', result);
