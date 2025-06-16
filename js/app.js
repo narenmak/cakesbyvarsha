@@ -44,7 +44,7 @@ async function loadCakes() {
                     <div class="card-body">
                         <h5 class="card-title">${cake.name}</h5>
                         <p class="card-text">${cake.description ? cake.description.substring(0, 100) + (cake.description.length > 100 ? '...' : '') : ''}</p>
-                        <p class="price">Starting from £${getMinPrice(cake.prices)}</p>
+                        <p class="price">Starting from GBP ${getMinPrice(cake.prices)}</p>
                         <a href="cake.html?id=${cake.id}" class="btn btn-primary">View Details</a>
                     </div>
                 </div>

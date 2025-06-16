@@ -69,18 +69,18 @@ async function loadCakes() {
       row.innerHTML = `
         <td>${cake.id}</td>
         <td>
-          <img src="${API_URL}${cake.image_url || '/api/images/placeholder.jpg'}" 
-               alt="${cake.name}" 
-               style="width: 50px; height: 50px; object-fit: cover;">
+            <img src="${API_URL}${cake.image_url || '/api/images/placeholder.jpg'}" 
+                alt="${cake.name}" 
+                style="width: 50px; height: 50px; object-fit: cover;">
         </td>
         <td>${cake.name}</td>
         <td>${cake.description ? cake.description.substring(0, 50) + '...' : ''}</td>
-        <td>₹${minPrice}</td>
+        <td>GBP ${minPrice}</td>
         <td>
-          <button class="btn btn-sm btn-primary edit-cake-btn" data-id="${cake.id}">Edit</button>
-          <button class="btn btn-sm btn-danger delete-cake-btn" data-id="${cake.id}">Delete</button>
+            <button class="btn btn-sm btn-primary edit-cake-btn" data-id="${cake.id}">Edit</button>
+            <button class="btn btn-sm btn-danger delete-cake-btn" data-id="${cake.id}">Delete</button>
         </td>
-      `;
+    `;
       
       tableBody.appendChild(row);
     });

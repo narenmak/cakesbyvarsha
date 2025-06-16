@@ -77,10 +77,10 @@ async function loadCakeDetails(cakeId) {
         }
         
         // Create prices HTML
-       let pricesHtml = '<ul class="cake-price-list">';
+      let pricesHtml = '<ul class="cake-price-list">';
         if (cake.prices && Object.keys(cake.prices).length > 0) {
             Object.entries(cake.prices).forEach(([size, price]) => {
-                pricesHtml += `<li>${size}: £${price}</li>`;
+                pricesHtml += `<li>${size}: GBP ${price}</li>`;
             });
         } else {
             pricesHtml += '<li>Price on request</li>';
