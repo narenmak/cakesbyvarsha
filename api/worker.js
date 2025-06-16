@@ -178,7 +178,9 @@ export default {
         }
         
         // Add a new cake (admin only)
-        if (path === '/api/admin/cakes' && request.method === 'POST') {
+        // Try a more flexible path matching
+        if (path.includes('/api/admin/cakes') && request.method === 'POST') {
+  // Your existing code
           // In production, verify admin token here
           
           // Handle multipart form data
