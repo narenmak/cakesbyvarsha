@@ -262,87 +262,109 @@ export default {
             });
           }
         }
-
         
         // Update an existing cake (admin only)
-       if (path.match(/^\/api\/admin\/cakes\/\d+$/) && request.method === 'PUT') {
-          // In production, verify admin token here
-          
-          const id = path.split('/').pop();
-          
-          // Handle multipart form data
-          const formData = await request.formData();
-          
-          const name = formData.get('name');
-          const description = formData.get('description');
-          const size6 = formData.get('size_6');
-          const size8 = formData.get('size_8');
-          const size10 = formData.get('size_10');
-          const flavors = formData.get('flavors');
-          
-          if (!name || !description) {
-            return new Response(JSON.stringify({ error: 'Missing required fields' }), {
+      // Update the edit cake endpoint in worker.js
+        if (path.match(/^\/api\/admin\/cakes\/\d+$/) && request.method === 'PUT') {
+          try {
+            const id = path.split('/').pop();
+            console.log(`Processing cake update for ID: ${id}`);
+            
+            const formData = await request.formData();
+            
+            // Update cake data
+            await env.DB.prepare(`
+              UPDATE cakes 
+              SET name = ?, description = ?, flavors = ?, prices = ?
+              WHERE id = ?
+            `).bind(
+              formData.get('name'),
+              formData.get('description'),
+              JSON.stringify(formData.get('flavors').split(',').map(f => f.trim()).filter(f => f)),
+              JSON.stringify({
+                '6 inches': parseInt(formData.get('size_6')) || 0,
+                '8 inches': parseInt(formData.get('size_8')) || 0,
+                '10 inches': parseInt(formData.get('size_10')) || 0
+              }),
+              id
+            ).run();
+            
+            // Handle new image uploads
+            const images = formData.getAll('images');
+            if (images && images.length > 0) {
+              for (let i = 0; i < images.length; i++) {
+                const image = images[i];
+                if (!image || !image.name) continue;
+                
+                // Generate unique filename
+                const filename = `${Date.now()}-${i}-${image.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+                
+                // Upload to R2
+                await env.IMAGES.put(filename, image);
+                
+                // Save image reference in database
+                await env.DB.prepare(`
+                  INSERT INTO cake_images (cake_id, image_name, image_path, is_primary)
+                  VALUES (?, ?, ?, ?)
+                `).bind(
+                  id,
+                  image.name,
+                  `/api/images/${filename}`,
+                  0 // New images are not primary by default
+                ).run();
+              }
+            }
+            
+            return new Response(JSON.stringify({ success: true }), responseInit);
+          } catch (error) {
+            console.error('Error updating cake:', error);
+            return new Response(JSON.stringify({ error: 'Error updating cake: ' + error.message }), {
               ...responseInit,
-              status: 400,
+              status: 500,
             });
           }
-          
-          // Parse flavors
-          const flavorsList = flavors.split(',').map(f => f.trim()).filter(f => f);
-          
-          // Create prices object
-          const prices = {
-            '6 inches': parseInt(size6) || 0,
-            '8 inches': parseInt(size8) || 0,
-            '10 inches': parseInt(size10) || 0,
-          };
-          
-          // Update cake
-          await env.DB.prepare(
-            `UPDATE cakes 
-             SET name = ?, description = ?, flavors = ?, prices = ?
-             WHERE id = ?`
-          ).bind(
-            name,
-            description,
-            JSON.stringify(flavorsList),
-            JSON.stringify(prices),
-            id
-          ).run();
-          
-          // Handle new image uploads
-          const images = formData.getAll('images');
-          if (images && images.length > 0) {
-            for (let i = 0; i < images.length; i++) {
-              const image = images[i];
-              if (!image.name) continue;
-              
-              // Generate unique filename
-              const filename = `${Date.now()}-${i}-${image.name}`;
-              
-              // Upload to R2
-              await env.IMAGES.put(filename, image);
-              
-              const imagePath = `/api/images/${filename}`;
+        }
 
-              // When saving to database, use the full path
-              await env.DB.prepare(
-                `INSERT INTO cake_images (cake_id, image_name, image_path, is_primary)
-                VALUES (?, ?, ?, ?)`
-              ).bind(
-                cakeId,
-                image.name,
-                imagePath, // Use the correct path
-                i === 0 ? 1 : 0
-              ).run();
+        // Add this endpoint to worker.js to fix the database
+          if (path === '/api/admin/fix-database' && request.method === 'POST') {
+            try {
+              // Find cakes with no images
+              const { results: cakesWithNoImages } = await env.DB.prepare(`
+                SELECT c.id FROM cakes c
+                LEFT JOIN cake_images ci ON c.id = ci.cake_id
+                WHERE ci.id IS NULL
+              `).all();
+              
+              console.log(`Found ${cakesWithNoImages.length} cakes with no images`);
+              
+              // Add placeholder image for each cake with no images
+              for (const cake of cakesWithNoImages) {
+                await env.DB.prepare(`
+                  INSERT INTO cake_images (cake_id, image_name, image_path, is_primary)
+                  VALUES (?, ?, ?, ?)
+                `).bind(
+                  cake.id,
+                  'placeholder.jpg',
+                  '/api/images/placeholder.jpg',
+                  1
+                ).run();
+                
+                console.log(`Added placeholder image for cake ID: ${cake.id}`);
+              }
+              
+              return new Response(JSON.stringify({ 
+                success: true, 
+                fixedCakes: cakesWithNoImages.length 
+              }), responseInit);
+            } catch (error) {
+              console.error('Error fixing database:', error);
+              return new Response(JSON.stringify({ error: 'Error fixing database: ' + error.message }), {
+                ...responseInit,
+                status: 500,
+              });
             }
           }
-          
-          return new Response(JSON.stringify({ 
-            success: true
-          }), responseInit);
-        }
-        
+
         // Delete a cake (admin only)
         if (path.match(/^\/api\/admin\/cakes\/\d+$/) && request.method === 'DELETE') {
           // In production, verify admin token here

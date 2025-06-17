@@ -472,6 +472,31 @@ async function deleteCake(id) {
     }
 
 
+// Add this to admin.js
+async function fixDatabase() {
+  try {
+    const response = await fetch(`${API_URL}/admin/fix-database`, {
+      method: 'POST'
+    });
+    
+    const result = await response.json();
+    
+    if (result.success) {
+      console.log(`Fixed ${result.fixedCakes} cakes with missing images`);
+      showAlert(`Database fixed: ${result.fixedCakes} cakes updated`, 'success');
+    } else {
+      showAlert(result.error || 'Failed to fix database', 'danger');
+    }
+  } catch (error) {
+    console.error('Error fixing database:', error);
+    showAlert('Failed to fix database', 'danger');
+  }
+}
+
+// Add a button to your admin dashboard to call this function
+// <button class="btn btn-warning" onclick="fixDatabase()">Fix Database</button>
+
+
 // Reset cake form
 function resetCakeForm() {
   const form = document.getElementById('cake-form');
