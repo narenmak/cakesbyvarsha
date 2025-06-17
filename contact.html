@@ -95,27 +95,63 @@
     <script src="js/config.js"></script>
     <script src="js/contact.js"></script>
     <!-- Add to contact.html before closing </body> tag -->
-<script src="https://cdn.emailjs.com/dist/email.min.js"></script>
+
+    <script src="https://cdn.emailjs.com/dist/email.min.js"></script>
 <script>
   (function() {
-    // Replace with your EmailJS user ID and template ID
+    // Replace this with your actual public key from EmailJS dashboard
     emailjs.init("eSqKrQG8BhCDR7zCl");
     
-    // Listen for form submissions
-    document.getElementById('contact-form').addEventListener('submit', function(event) {
-      // Prevent default form submission
-      event.preventDefault();
+    const form = document.getElementById('contact-form');
+    form.addEventListener('submit', function(e) {
+      e.preventDefault(); // Prevent default form submission
       
-      // Send email using EmailJS
-      emailjs.sendForm('service_wy19h4e', 'template_4mwugtn', this)
+      // Send to API
+      const formData = new FormData(form);
+      const contactData = {
+        name: formData.get('name'),
+        email: formData.get('email'),
+        phone: formData.get('phone') || '',
+        message: formData.get('message')
+      };
+      
+      // Send email notification
+      const templateParams = {
+        name: contactData.name,
+        email: contactData.email,
+        phone: contactData.phone,
+        message: contactData.message
+      };
+      
+      // Replace with your actual service ID and template ID
+      emailjs.send("service_wy19h4e", "template_4mwugtn", templateParams)
         .then(function() {
-          console.log('Email sent successfully');
-        }, function(error) {
+          // Show success message
+          const formAlert = document.getElementById('form-alert');
+          if (formAlert) {
+            formAlert.classList.remove('d-none', 'alert-danger');
+            formAlert.classList.add('alert-success');
+            formAlert.innerHTML = 'Your message has been sent successfully! We will get back to you soon.';
+          }
+          
+          // Reset form
+          form.reset();
+        })
+        .catch(function(error) {
           console.error('Email sending failed:', error);
+          
+          // Show error message
+          const formAlert = document.getElementById('form-alert');
+          if (formAlert) {
+            formAlert.classList.remove('d-none', 'alert-success');
+            formAlert.classList.add('alert-danger');
+            formAlert.innerHTML = 'Failed to send message. Please try again later.';
+          }
         });
     });
   })();
 </script>
+
 
 
 </body>
