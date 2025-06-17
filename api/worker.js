@@ -372,26 +372,88 @@ if (path.match(/^\/api\/admin\/cakes\/\d+$/) && request.method === 'PUT') {
             }
           }
 
-        // Delete a cake (admin only)
-        if (path.match(/^\/api\/admin\/cakes\/\d+$/) && request.method === 'DELETE') {
-          // In production, verify admin token here
-          
-          const id = path.split('/').pop();
-          
-          // Delete associated images first
-          await env.DB.prepare(
-            `DELETE FROM cake_images WHERE cake_id = ?`
-          ).bind(id).run();
-          
-          // Delete the cake
-          await env.DB.prepare(
-            `DELETE FROM cakes WHERE id = ?`
-          ).bind(id).run();
-          
-          return new Response(JSON.stringify({ 
-            success: true
-          }), responseInit);
-        }
+     // Delete an image
+if (path.match(/^\/api\/admin\/images\/\d+$/) && request.method === 'DELETE') {
+  try {
+    const imageId = path.split('/').pop();
+    
+    // Get the image info first
+    const image = await env.DB.prepare(
+      'SELECT * FROM cake_images WHERE id = ?'
+    ).bind(imageId).first();
+    
+    if (!image) {
+      return new Response(JSON.stringify({ error: 'Image not found' }), {
+        ...responseInit,
+        status: 404,
+      });
+    }
+    
+    // Delete from database
+    await env.DB.prepare(
+      'DELETE FROM cake_images WHERE id = ?'
+    ).bind(imageId).run();
+    
+    // If this was the primary image, set a new primary
+    if (image.is_primary) {
+      const nextImage = await env.DB.prepare(
+        'SELECT id FROM cake_images WHERE cake_id = ? LIMIT 1'
+      ).bind(image.cake_id).first();
+      
+      if (nextImage) {
+        await env.DB.prepare(
+          'UPDATE cake_images SET is_primary = 1 WHERE id = ?'
+        ).bind(nextImage.id).run();
+      }
+    }
+    
+    return new Response(JSON.stringify({ success: true }), responseInit);
+  } catch (error) {
+    console.error('Error deleting image:', error);
+    return new Response(JSON.stringify({ error: 'Error deleting image: ' + error.message }), {
+      ...responseInit,
+      status: 500,
+    });
+  }
+}
+
+// Set primary image
+if (path.match(/^\/api\/admin\/images\/\d+\/set-primary$/) && request.method === 'POST') {
+  try {
+    const imageId = path.split('/')[4];
+    
+    // Get the cake_id for this image
+    const image = await env.DB.prepare(
+      'SELECT cake_id FROM cake_images WHERE id = ?'
+    ).bind(imageId).first();
+    
+    if (!image) {
+      return new Response(JSON.stringify({ error: 'Image not found' }), {
+        ...responseInit,
+        status: 404,
+      });
+    }
+    
+    // Clear primary flag on all images for this cake
+    await env.DB.prepare(
+      'UPDATE cake_images SET is_primary = 0 WHERE cake_id = ?'
+    ).bind(image.cake_id).run();
+    
+    // Set this image as primary
+    await env.DB.prepare(
+      'UPDATE cake_images SET is_primary = 1 WHERE id = ?'
+    ).bind(imageId).run();
+    
+    return new Response(JSON.stringify({ success: true }), responseInit);
+  } catch (error) {
+    console.error('Error setting primary image:', error);
+    return new Response(JSON.stringify({ error: 'Error setting primary image: ' + error.message }), {
+      ...responseInit,
+      status: 500,
+    });
+  }
+}
+
         
         // Add this to your worker.js
 if (path.match(/^\/api\/admin\/force-delete-cake\/\d+$/) && request.method === 'DELETE') {

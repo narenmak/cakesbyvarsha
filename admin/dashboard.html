@@ -158,6 +158,22 @@
                             <input type="file" class="form-control" id="cake-images" name="images" accept="image/*" multiple>
                             <div class="form-text" id="image-help-text">You can select up to 4 images. First image will be the primary image.</div>
                         </div>
+
+                        <!-- Add this to the cake form in the modal -->
+                        <div class="mb-3">
+                        <label class="form-label">Current Images</label>
+                        <div id="existing-images-container" class="d-flex flex-wrap gap-2 mb-3">
+                            <!-- Existing images will be loaded here -->
+                            <div class="text-center">Loading images...</div>
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="replace-all-images">
+                            <label class="form-check-label" for="replace-all-images">
+                            Replace all images with new uploads
+                            </label>
+                        </div>
+                        </div>
+
                         
                         <div id="image-preview-container" class="d-flex flex-wrap gap-2 mb-3">
                             <!-- Image previews will be shown here -->

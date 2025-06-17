@@ -237,9 +237,9 @@ function viewEnquiry(id, enquiries) {
 }
 
 // Edit cake
+// In admin.js - Update the editCake function
 async function editCake(id) {
   try {
-    console.log('Loading cake details from:', `${API_URL}/cakes/${id}`);
     const response = await fetch(`${API_URL}/cakes/${id}`);
     
     if (!response.ok) {
@@ -247,7 +247,6 @@ async function editCake(id) {
     }
     
     const cake = await response.json();
-    console.log('Cake details loaded:', cake);
     
     // Reset form
     resetCakeForm();
@@ -266,25 +265,61 @@ async function editCake(id) {
     
     // Show existing images
     const existingImagesContainer = document.getElementById('existing-images-container');
-    existingImagesContainer.innerHTML = '<h6>Current Images:</h6>';
+    existingImagesContainer.innerHTML = '';
     
     if (cake.images && cake.images.length > 0) {
       cake.images.forEach((image, index) => {
+        // Fix image URL path
+        let imageUrl = 'images/placeholder.jpg';
+        if (image.image_path) {
+          if (image.image_path.startsWith('http')) {
+            imageUrl = image.image_path;
+          } else {
+            const baseUrl = API_URL.replace(/\/api$/, '');
+            imageUrl = baseUrl + image.image_path;
+          }
+        }
+        
         const imageDiv = document.createElement('div');
-        imageDiv.className = 'position-relative';
+        imageDiv.className = 'position-relative image-item';
+        imageDiv.dataset.imageId = image.id;
         imageDiv.innerHTML = `
-          <img src="${API_URL}${image.image_path}" 
+          <img src="${imageUrl}" 
                alt="Cake image ${index + 1}" 
                class="img-thumbnail" 
                style="width: 100px; height: 100px; object-fit: cover;">
           <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-${image.is_primary ? 'success' : 'secondary'}">
             ${image.is_primary ? 'Primary' : ''}
           </span>
+          <button type="button" class="btn btn-sm btn-danger position-absolute bottom-0 end-0 delete-image-btn" 
+                  data-image-id="${image.id}" data-cake-id="${cake.id}">
+            <i class="fas fa-trash"></i>
+          </button>
+          ${!image.is_primary ? `
+          <button type="button" class="btn btn-sm btn-success position-absolute bottom-0 start-0 set-primary-btn" 
+                  data-image-id="${image.id}" data-cake-id="${cake.id}">
+            <i class="fas fa-star"></i>
+          </button>` : ''}
         `;
         existingImagesContainer.appendChild(imageDiv);
       });
+      
+      // Add event listeners to delete and set primary buttons
+      document.querySelectorAll('.delete-image-btn').forEach(button => {
+        button.addEventListener('click', (e) => {
+          e.preventDefault();
+          deleteImage(button.dataset.imageId, button.dataset.cakeId);
+        });
+      });
+      
+      document.querySelectorAll('.set-primary-btn').forEach(button => {
+        button.addEventListener('click', (e) => {
+          e.preventDefault();
+          setPrimaryImage(button.dataset.imageId, button.dataset.cakeId);
+        });
+      });
     } else {
-      existingImagesContainer.innerHTML += '<p>No images available</p>';
+      existingImagesContainer.innerHTML = '<p>No images available</p>';
     }
     
     // Show modal
@@ -294,6 +329,62 @@ async function editCake(id) {
   } catch (error) {
     console.error('Error loading cake details:', error);
     showAlert('Failed to load cake details', 'danger');
+  }
+}
+
+
+// Add these functions to admin.js
+async function deleteImage(imageId, cakeId) {
+  if (!confirm('Are you sure you want to delete this image?')) {
+    return;
+  }
+  
+  try {
+    const response = await fetch(`${API_URL}/admin/images/${imageId}`, {
+      method: 'DELETE'
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+    
+    const result = await response.json();
+    
+    if (result.success) {
+      // Remove the image from the UI
+      document.querySelector(`.image-item[data-image-id="${imageId}"]`).remove();
+      showAlert('Image deleted successfully', 'success');
+    } else {
+      showAlert(result.error || 'Failed to delete image', 'danger');
+    }
+  } catch (error) {
+    console.error('Error deleting image:', error);
+    showAlert('Failed to delete image', 'danger');
+  }
+}
+
+async function setPrimaryImage(imageId, cakeId) {
+  try {
+    const response = await fetch(`${API_URL}/admin/images/${imageId}/set-primary`, {
+      method: 'POST'
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+    
+    const result = await response.json();
+    
+    if (result.success) {
+      // Reload the cake to refresh the images
+      editCake(cakeId);
+      showAlert('Primary image updated successfully', 'success');
+    } else {
+      showAlert(result.error || 'Failed to update primary image', 'danger');
+    }
+  } catch (error) {
+    console.error('Error setting primary image:', error);
+    showAlert('Failed to update primary image', 'danger');
   }
 }
 
@@ -376,6 +467,11 @@ async function deleteCake(id) {
           }
         }
         
+        // Check if "replace all images" is checked
+        const replaceAllImages = document.getElementById('replace-all-images')?.checked || false;
+  
+        // Add to form data
+        formData.append('replace_images', replaceAllImages ? 'true' : 'false');
         // // Compress and add images if any
         // if (imageInput.files && imageInput.files.length > 0) {
         //   for (let i = 0; i < imageInput.files.length; i++) {
