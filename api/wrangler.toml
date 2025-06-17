@@ -16,3 +16,10 @@ bucket_name = "cakesbyvarsha-images"
 # Environment variables (secrets will be set via Cloudflare dashboard)
 [vars]
 ENVIRONMENT = "production"
+
+
+# Email configuration
+[vars]
+EMAIL_RECIPIENT = "narenmak7@gmail.com,varshamak2@gmail.com"
+EMAIL_SENDER = "enquiries@cakesbyvarsha.uk"
+

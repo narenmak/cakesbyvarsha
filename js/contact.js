@@ -4,6 +4,8 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function setupContactForm() {
+   // js/contact.js
+document.addEventListener('DOMContentLoaded', () => {
     const contactForm = document.getElementById('contact-form');
     if (!contactForm) return;
     
@@ -36,6 +38,7 @@ function setupContactForm() {
         `;
         
         try {
+            // First save to database via API
             const response = await fetch(`${API_URL}/enquiry`, {
                 method: 'POST',
                 headers: {
@@ -46,31 +49,37 @@ function setupContactForm() {
             
             const result = await response.json();
             
-            if (result.success) {
-                // Show success message
-                const formAlert = document.getElementById('form-alert');
+            if (!result.success) {
+                throw new Error(result.error || 'Failed to send message');
+            }
+            
+            // Show success message
+            const formAlert = document.getElementById('form-alert');
+            if (formAlert) {
                 formAlert.classList.remove('d-none', 'alert-danger');
                 formAlert.classList.add('alert-success');
                 formAlert.innerHTML = 'Your message has been sent successfully! We will get back to you soon.';
-                
-                // Reset form
-                contactForm.reset();
-                contactForm.classList.remove('was-validated');
-            } else {
-                throw new Error(result.error || 'Failed to send message');
             }
+            
+            // Reset form
+            contactForm.reset();
+            contactForm.classList.remove('was-validated');
         } catch (error) {
             console.error('Error sending contact form:', error);
             
             // Show error message
             const formAlert = document.getElementById('form-alert');
-            formAlert.classList.remove('d-none', 'alert-success');
-            formAlert.classList.add('alert-danger');
-            formAlert.innerHTML = 'Failed to send message. Please try again later or contact us directly.';
+            if (formAlert) {
+                formAlert.classList.remove('d-none', 'alert-success');
+                formAlert.classList.add('alert-danger');
+                formAlert.innerHTML = 'Failed to send message. Please try again later or contact us directly.';
+            }
         } finally {
             // Restore button state
             submitButton.disabled = false;
             submitButton.innerHTML = originalButtonText;
         }
     });
+});
+
 }

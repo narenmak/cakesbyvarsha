@@ -94,6 +94,29 @@
       <script src="js/template-loader.js"></script> 
     <script src="js/config.js"></script>
     <script src="js/contact.js"></script>
+    <!-- Add to contact.html before closing </body> tag -->
+<script src="https://cdn.emailjs.com/dist/email.min.js"></script>
+<script>
+  (function() {
+    // Replace with your EmailJS user ID and template ID
+    emailjs.init("narenmak7@gmail.com");
+    
+    // Listen for form submissions
+    document.getElementById('contact-form').addEventListener('submit', function(event) {
+      // Prevent default form submission
+      event.preventDefault();
+      
+      // Send email using EmailJS
+      emailjs.sendForm('service_wy19h4e', 'template_4mwugtn', this)
+        .then(function() {
+          console.log('Email sent successfully');
+        }, function(error) {
+          console.error('Email sending failed:', error);
+        });
+    });
+  })();
+</script>
+
 
 </body>
 </html>

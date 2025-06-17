@@ -90,45 +90,49 @@ export default {
         }
         
         // Submit an enquiry
-        if (path === '/api/enquiry' && request.method === 'POST') {
-          const data = await request.json();
-          
-          // Validate required fields
-          if (!data.name || !data.email || !data.message) {
-            return new Response(JSON.stringify({ error: 'Missing required fields' }), {
-              ...responseInit,
-              status: 400,
-            });
-          }
-          
-          // Insert enquiry
-          await env.DB.prepare(
-            `INSERT INTO enquiries (cake_id, cake_name, customer_name, email, phone, date_needed, 
-             occasion, size, flavor, special_considerations)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-          ).bind(
-            data.cake_id || null,
-            data.cake_name || null,
-            data.name,
-            data.email,
-            data.phone || null,
-            data.date_needed || null,
-            data.occasion || null,
-            data.size || null,
-            data.flavor || null,
-            data.message
-          ).run();
-          
-          // Send email notification
-          try {
-            await sendEmailNotification(env, data);
-          } catch (emailError) {
-            console.error('Failed to send email notification:', emailError);
-            // Continue with the response even if email fails
-          }
-          
-          return new Response(JSON.stringify({ success: true }), responseInit);
-        }
+        // In worker.js - Update the enquiry endpoint
+        // In worker.js - Update the enquiry endpoint
+if (path === '/api/enquiry' && request.method === 'POST') {
+  try {
+    const data = await request.json();
+    console.log('Received enquiry:', data);
+    
+    // Validate required fields
+    if (!data.name || !data.email || !data.message) {
+      return new Response(JSON.stringify({ error: 'Missing required fields' }), {
+        ...responseInit,
+        status: 400,
+      });
+    }
+    
+    // Insert enquiry into database
+    await env.DB.prepare(
+      `INSERT INTO enquiries (customer_name, email, phone, special_considerations)
+       VALUES (?, ?, ?, ?)`
+    ).bind(
+      data.name,
+      data.email,
+      data.phone || null,
+      data.message
+    ).run();
+    
+    // For email notifications, use a free service like EmailJS or Formspree
+    // This requires client-side implementation
+    
+    return new Response(JSON.stringify({ 
+      success: true,
+      message: 'Enquiry saved successfully'
+    }), responseInit);
+  } catch (error) {
+    console.error('Error processing enquiry:', error);
+    return new Response(JSON.stringify({ error: 'Internal server error' }), {
+      ...responseInit,
+      status: 500,
+    });
+  }
+}
+
+
         
         // Admin login
         if (path === '/api/admin/login' && request.method === 'POST') {
