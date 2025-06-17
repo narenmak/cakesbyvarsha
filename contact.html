@@ -96,35 +96,28 @@
     <script src="js/contact.js"></script>
     <!-- Add to contact.html before closing </body> tag -->
 
-    <script src="https://cdn.emailjs.com/dist/email.min.js"></script>
+    <!-- Replace the old EmailJS script with this -->
+<script src="https://cdn.emailjs.com/sdk/2.6.4/email.min.js"></script>
 <script>
   (function() {
-    // Replace this with your actual public key from EmailJS dashboard
+    // Replace with your actual public key
     emailjs.init("eSqKrQG8BhCDR7zCl");
     
     const form = document.getElementById('contact-form');
     form.addEventListener('submit', function(e) {
-      e.preventDefault(); // Prevent default form submission
+      e.preventDefault();
       
-      // Send to API
-      const formData = new FormData(form);
-      const contactData = {
-        name: formData.get('name'),
-        email: formData.get('email'),
-        phone: formData.get('phone') || '',
-        message: formData.get('message')
-      };
+      // Show loading state
+      const submitButton = form.querySelector('button[type="submit"]');
+      const originalButtonText = submitButton.innerHTML;
+      submitButton.disabled = true;
+      submitButton.innerHTML = `
+        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+        Sending...
+      `;
       
-      // Send email notification
-      const templateParams = {
-        name: contactData.name,
-        email: contactData.email,
-        phone: contactData.phone,
-        message: contactData.message
-      };
-      
-      // Replace with your actual service ID and template ID
-      emailjs.send("service_wy19h4e", "template_4mwugtn", templateParams)
+      // Send email using EmailJS
+      emailjs.sendForm('service_wy19h4e', 'template_4mwugtn', form)
         .then(function() {
           // Show success message
           const formAlert = document.getElementById('form-alert');
@@ -147,6 +140,11 @@
             formAlert.classList.add('alert-danger');
             formAlert.innerHTML = 'Failed to send message. Please try again later.';
           }
+        })
+        .finally(function() {
+          // Restore button state
+          submitButton.disabled = false;
+          submitButton.innerHTML = originalButtonText;
         });
     });
   })();
