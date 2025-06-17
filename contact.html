@@ -11,7 +11,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&family=Pacifico&display=swap" rel="stylesheet">
 
     <!-- Add config.js in the head section -->
-    <script src="js/config.js"></script>
 </head>
 <body>
     <div class="container py-5">
@@ -90,31 +89,29 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-     <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
       <script src="js/template-loader.js"></script> 
     <script src="js/config.js"></script>
     <script src="js/contact.js"></script>
     <!-- Add to contact.html before closing </body> tag -->
 
     <!-- Replace the old EmailJS script with this -->
-<script src="https://cdn.emailjs.com/sdk/2.6.4/email.min.js"></script>
-<script>
+<!-- Add this to contact.html before the closing </body> tag -->
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+<script type="text/javascript">
   (function() {
-    // Replace with your actual public key
+    // Load EmailJS SDK
     emailjs.init("eSqKrQG8BhCDR7zCl");
     
-    const form = document.getElementById('contact-form');
-    form.addEventListener('submit', function(e) {
+    // Handle form submission
+    document.getElementById('contact-form').addEventListener('submit', function(e) {
       e.preventDefault();
       
       // Show loading state
-      const submitButton = form.querySelector('button[type="submit"]');
+      const submitButton = this.querySelector('button[type="submit"]');
       const originalButtonText = submitButton.innerHTML;
       submitButton.disabled = true;
-      submitButton.innerHTML = `
-        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-        Sending...
-      `;
+      submitButton.innerHTML = 'Sending...';
       
       // Send email using EmailJS
       emailjs.sendForm('service_wy19h4e', 'template_4mwugtn', form)
@@ -130,16 +127,10 @@
           // Reset form
           form.reset();
         })
-        .catch(function(error) {
-          console.error('Email sending failed:', error);
-          
+         .catch(function(error) {
           // Show error message
-          const formAlert = document.getElementById('form-alert');
-          if (formAlert) {
-            formAlert.classList.remove('d-none', 'alert-success');
-            formAlert.classList.add('alert-danger');
-            formAlert.innerHTML = 'Failed to send message. Please try again later.';
-          }
+          alert('Failed to send message. Please try again later.');
+          console.error('EmailJS error:', error);
         })
         .finally(function() {
           // Restore button state
