@@ -265,66 +265,73 @@ export default {
         
         // Update an existing cake (admin only)
       // Update the edit cake endpoint in worker.js
-        if (path.match(/^\/api\/admin\/cakes\/\d+$/) && request.method === 'PUT') {
-          try {
-            const id = path.split('/').pop();
-            console.log(`Processing cake update for ID: ${id}`);
-            
-            const formData = await request.formData();
-            
-            // Update cake data
-            await env.DB.prepare(`
-              UPDATE cakes 
-              SET name = ?, description = ?, flavors = ?, prices = ?
-              WHERE id = ?
-            `).bind(
-              formData.get('name'),
-              formData.get('description'),
-              JSON.stringify(formData.get('flavors').split(',').map(f => f.trim()).filter(f => f)),
-              JSON.stringify({
-                '6 inches': parseInt(formData.get('size_6')) || 0,
-                '8 inches': parseInt(formData.get('size_8')) || 0,
-                '10 inches': parseInt(formData.get('size_10')) || 0
-              }),
-              id
-            ).run();
-            
-            // Handle new image uploads
-            const images = formData.getAll('images');
-            if (images && images.length > 0) {
-              for (let i = 0; i < images.length; i++) {
-                const image = images[i];
-                if (!image || !image.name) continue;
-                
-                // Generate unique filename
-                const filename = `${Date.now()}-${i}-${image.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
-                
-                // Upload to R2
-                await env.IMAGES.put(filename, image);
-                
-                // Save image reference in database
-                await env.DB.prepare(`
-                  INSERT INTO cake_images (cake_id, image_name, image_path, is_primary)
-                  VALUES (?, ?, ?, ?)
-                `).bind(
-                  id,
-                  image.name,
-                  `/api/images/${filename}`,
-                  0 // New images are not primary by default
-                ).run();
-              }
-            }
-            
-            return new Response(JSON.stringify({ success: true }), responseInit);
-          } catch (error) {
-            console.error('Error updating cake:', error);
-            return new Response(JSON.stringify({ error: 'Error updating cake: ' + error.message }), {
-              ...responseInit,
-              status: 500,
-            });
-          }
-        }
 
+        // In worker.js - Update the edit cake endpoint
+if (path.match(/^\/api\/admin\/cakes\/\d+$/) && request.method === 'PUT') {
+  try {
+    const id = path.split('/').pop();
+    console.log(`Processing cake update for ID: ${id}`);
+    
+    const formData = await request.formData();
+    const replaceImages = formData.get('replace_images') === 'true';
+    
+    // Update cake data
+    await env.DB.prepare(`
+      UPDATE cakes 
+      SET name = ?, description = ?, flavors = ?, prices = ?
+      WHERE id = ?
+    `).bind(
+      formData.get('name'),
+      formData.get('description'),
+      JSON.stringify(formData.get('flavors').split(',').map(f => f.trim()).filter(f => f)),
+      JSON.stringify({
+        '6 inches': parseInt(formData.get('size_6')) || 0,
+        '8 inches': parseInt(formData.get('size_8')) || 0,
+        '10 inches': parseInt(formData.get('size_10')) || 0
+      }),
+      id
+    ).run();
+    
+    // Handle new image uploads
+    const images = formData.getAll('images');
+    if (images && images.length > 0 && images[0].size > 0) {
+      // If replacing images, delete old ones first
+      if (replaceImages) {
+        await env.DB.prepare('DELETE FROM cake_images WHERE cake_id = ?').bind(id).run();
+      }
+      
+      for (let i = 0; i < images.length; i++) {
+        const image = images[i];
+        if (!image || !image.name) continue;
+        
+        // Generate unique filename
+        const filename = `${Date.now()}-${i}-${image.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+        
+        // Upload to R2
+        await env.IMAGES.put(filename, image);
+        
+        // Save image reference in database
+        await env.DB.prepare(`
+          INSERT INTO cake_images (cake_id, image_name, image_path, is_primary)
+          VALUES (?, ?, ?, ?)
+        `).bind(
+          id,
+          image.name,
+          `/api/images/${filename}`,
+          replaceImages && i === 0 ? 1 : 0 // First image is primary if replacing
+        ).run();
+      }
+    }
+    
+    return new Response(JSON.stringify({ success: true }), responseInit);
+  } catch (error) {
+    console.error('Error updating cake:', error);
+    return new Response(JSON.stringify({ error: 'Error updating cake: ' + error.message }), {
+      ...responseInit,
+      status: 500,
+    });
+  }
+}
         // Add this endpoint to worker.js to fix the database
           if (path === '/api/admin/fix-database' && request.method === 'POST') {
             try {
@@ -386,6 +393,33 @@ export default {
           }), responseInit);
         }
         
+        // Add this to your worker.js
+if (path.match(/^\/api\/admin\/force-delete-cake\/\d+$/) && request.method === 'DELETE') {
+  try {
+    const id = path.split('/').pop();
+    console.log(`Force deleting cake ID: ${id}`);
+    
+    // Delete in a transaction
+    await env.DB.prepare('BEGIN TRANSACTION').run();
+    await env.DB.prepare('DELETE FROM cake_images WHERE cake_id = ?').bind(id).run();
+    await env.DB.prepare('DELETE FROM cakes WHERE id = ?').bind(id).run();
+    await env.DB.prepare('COMMIT').run();
+    
+    return new Response(JSON.stringify({ 
+      success: true, 
+      message: `Cake ID ${id} and all associated images deleted` 
+    }), responseInit);
+  } catch (error) {
+    // Rollback on error
+    await env.DB.prepare('ROLLBACK').run();
+    console.error('Error force deleting cake:', error);
+    return new Response(JSON.stringify({ error: 'Error deleting cake: ' + error.message }), {
+      ...responseInit,
+      status: 500,
+    });
+  }
+}
+
         // Serve images from R2
         // In worker.js - Verify the image serving endpoint
         if (path.startsWith('/api/images/')) {

@@ -10,12 +10,13 @@ function initApp() {
     loadCakes();
 }
 
-async function loadCakes() {
+    // In app.js - Fix image URL handling
+    async function loadCakes() {
     try {
         const response = await fetch(`${API_URL}/cakes`);
         
         if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
+        throw new Error(`HTTP error! Status: ${response.status}`);
         }
         
         const cakes = await response.json();
@@ -26,47 +27,53 @@ async function loadCakes() {
         cakesContainer.innerHTML = '';
         
         if (cakes.length === 0) {
-            cakesContainer.innerHTML = '<p class="text-center">No cakes available at the moment.</p>';
-            return;
+        cakesContainer.innerHTML = '<p class="text-center">No cakes available at the moment.</p>';
+        return;
         }
         
         cakes.forEach(cake => {
-            // Fix image URL path
-            // In app.js - Update the image URL handling
-            
-
-            // In app.js - Fix image URL handling
-            const imageUrl = cake.image_url 
-            ? (cake.image_url.startsWith('http') 
-                ? cake.image_url 
-                : API_URL.substring(0, API_URL.lastIndexOf('/api')) + cake.image_url)
-            : 'images/placeholder.jpg';
-
-
-            
-            const cakeCard = document.createElement('div');
-            cakeCard.className = 'col-md-4 mb-4';
-           cakeCard.innerHTML = `
-                <div class="card h-100">
-                    <img src="${imageUrl}" class="card-img-top" alt="${cake.name}">
-                    <div class="card-body">
-                        <h5 class="card-title">${cake.name}</h5>
-                        <p class="card-text">${cake.description ? cake.description.substring(0, 100) + (cake.description.length > 100 ? '...' : '') : ''}</p>
-                        <p class="price">Starting from GBP ${getMinPrice(cake.prices)}</p>
-                        <a href="cake.html?id=${cake.id}" class="btn btn-primary">View Details</a>
-                    </div>
-                </div>
-            `;
-            cakesContainer.appendChild(cakeCard);
+        // Fix image URL path
+        let imageUrl = 'images/placeholder.jpg';
+        
+        if (cake.image_url) {
+            // Handle both relative and absolute URLs
+            if (cake.image_url.startsWith('http')) {
+            imageUrl = cake.image_url;
+            } else {
+            // Remove /api from the API_URL to get the base URL
+            const baseUrl = API_URL.replace(/\/api$/, '');
+            imageUrl = baseUrl + cake.image_url;
+            }
+        }
+        
+        // Find the minimum price
+        let minPrice = 0;
+        if (cake.prices) {
+            const prices = Object.values(cake.prices).filter(price => !isNaN(price) && price > 0);
+            minPrice = prices.length > 0 ? Math.min(...prices) : 0;
+        }
+        
+        const cakeCard = document.createElement('div');
+        cakeCard.className = 'col-md-4 mb-4';
+        cakeCard.innerHTML = `
+            <div class="card h-100">
+            <img src="${imageUrl}" class="card-img-top" alt="${cake.name}" onerror="this.src='images/placeholder.jpg'">
+            <div class="card-body">
+                <h5 class="card-title">${cake.name}</h5>
+                <p class="card-text">${cake.description ? cake.description.substring(0, 100) + (cake.description.length > 100 ? '...' : '') : ''}</p>
+                <p class="price">Starting from GBP ${minPrice}</p>
+                <a href="cake.html?id=${cake.id}" class="btn btn-primary">View Details</a>
+            </div>
+            </div>
+        `;
+        cakesContainer.appendChild(cakeCard);
         });
     } catch (error) {
         console.error('Error loading cakes:', error);
-        const cakesContainer = document.getElementById('cakes-container');
-        if (cakesContainer) {
-            cakesContainer.innerHTML = '<p class="text-center text-danger">Failed to load cakes. Please try again later.</p>';
-        }
+        document.getElementById('cakes-container').innerHTML = 
+        '<p class="text-center text-danger">Failed to load cakes. Please try again later.</p>';
     }
-}
+    }
 
 function getMinPrice(prices) {
     if (!prices) return 0;

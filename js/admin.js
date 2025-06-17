@@ -364,16 +364,28 @@ async function deleteCake(id) {
         formData.append('size_10', size10);
         formData.append('flavors', flavors);
         
-        // Compress and add images if any
+        // Add flag to replace images if new ones are provided
         if (imageInput.files && imageInput.files.length > 0) {
+          formData.append('replace_images', 'true');
+          
+          // Add compressed images
           for (let i = 0; i < imageInput.files.length; i++) {
             const file = imageInput.files[i];
-            
-            // Compress image
             const compressedFile = await compressImage(file);
             formData.append('images', compressedFile, file.name);
           }
         }
+        
+        // // Compress and add images if any
+        // if (imageInput.files && imageInput.files.length > 0) {
+        //   for (let i = 0; i < imageInput.files.length; i++) {
+        //     const file = imageInput.files[i];
+            
+        //     // Compress image
+        //     const compressedFile = await compressImage(file);
+        //     formData.append('images', compressedFile, file.name);
+        //   }
+        // }
         
         const url = isEdit 
           ? `${API_URL}/admin/cakes/${cakeId}` 
